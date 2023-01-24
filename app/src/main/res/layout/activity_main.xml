@@ -1,71 +1,114 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    tools:context=".MainActivity">
+    xmlns:tools="http://schemas.android.com/tools">
 
-    <!--Text View for the "Steps" displayed-->
-    <TextView
-        android:id="@+id/steps"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginEnd="8dp"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="290dp"
-        android:text="Steps"
-        android:textSize="45sp"
-        android:textColor="@color/black"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+    <data>
 
-    <!--Text View for the step count-->
-    <TextView
-        android:id="@+id/tv_stepsTaken"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginEnd="8dp"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="30dp"
-        android:text="0"
-        android:textSize="37sp"
-        android:textColor="@color/purple_200"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/steps" />
+    </data>
 
-    <!--Image View for the circle-->
-    <ImageView
-        android:id="@+id/iv_circle"
-        android:layout_width="200dp"
-        android:layout_height="200dp"
-        android:layout_marginTop="264dp"
-        android:background="@drawable/circle"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.497"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        tools:context=".MainActivity">
+
+        <!--Text View for the "Steps" displayed-->
 
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginEnd="8dp"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="30dp"
-        android:text="@string/long_tap_on_the_count_to_reset_steps"
-        android:textSize="27sp"
-        android:gravity="center"
-        android:textColor="#636262"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/iv_circle" />
+        <TextView
+            android:id="@+id/tv_total_steps"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="48dp"
+            android:gravity="center"
+            android:text="@string/total_steps"
+            android:textColor="#636262"
+            android:textSize="27sp"
+            android:textStyle="bold"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/tv_total_steps_value"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:text="0"
+            android:textColor="@color/purple_200"
+            android:textSize="27sp"
+            android:textStyle="bold"
+            app:layout_constraintStart_toEndOf="@+id/tv_total_steps"
+            app:layout_constraintTop_toTopOf="@+id/tv_total_steps" />
+
+        <ProgressBar
+            android:id="@+id/progress_bar"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:padding="4dp"
+            android:outlineAmbientShadowColor="@color/purple_200"
+            app:layout_constraintStart_toEndOf="@+id/tv_total_steps_value"
+            app:layout_constraintTop_toTopOf="@id/tv_total_steps_value"
+            android:indeterminateTint="@color/purple_200"
+            app:layout_constraintBottom_toBottomOf="@id/tv_total_steps_value"
+            android:shadowColor="@color/purple_200"
+            android:progressBackgroundTint="@color/purple_200"/>
+
+        <TextView
+            android:id="@+id/steps"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="290dp"
+            android:layout_marginEnd="8dp"
+            android:text="Steps"
+            android:textColor="@color/black"
+            android:textSize="45sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <!--Text View for the step count-->
+        <TextView
+            android:id="@+id/tv_stepsTaken"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="30dp"
+            android:layout_marginEnd="8dp"
+            android:text="0"
+            android:textColor="@color/purple_200"
+            android:textSize="37sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/steps" />
+
+        <!--Image View for the circle-->
+        <ImageView
+            android:id="@+id/iv_circle"
+            android:layout_width="200dp"
+            android:layout_height="200dp"
+            android:layout_marginTop="264dp"
+            android:background="@drawable/circle"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.497"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
 
 
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="30dp"
+            android:layout_marginEnd="8dp"
+            android:gravity="center"
+            android:text="@string/long_tap_on_the_count_to_reset_steps"
+            android:textColor="#636262"
+            android:textSize="27sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/iv_circle" />
 
 
-
-</androidx.constraintlayout.widget.ConstraintLayout>
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</layout>
