@@ -21,6 +21,8 @@ import com.example.stepcountpoc.databinding.ActivityMainBinding
 class MainActivity : AppCompatActivity(), SensorEventListener {
 
     private var sensorManager: SensorManager? = null
+    private var stepCounterSensor: Sensor? = null
+    private var stepDetectorSensor: Sensor? = null
     private var running = false
     var count = 0
 
@@ -70,8 +72,8 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
 
     private fun initializeSensors() {
         running = true
-        val stepCounterSensor = sensorManager?.getDefaultSensor(TYPE_STEP_COUNTER)
-        val stepDetectorSensor = sensorManager?.getDefaultSensor(TYPE_STEP_DETECTOR)
+        stepCounterSensor = sensorManager?.getDefaultSensor(TYPE_STEP_COUNTER)
+        stepDetectorSensor = sensorManager?.getDefaultSensor(TYPE_STEP_DETECTOR)
         if (stepCounterSensor == null || stepDetectorSensor == null) {
             // This will give a toast message to the user if there is no sensor in the device
             Toast.makeText(this, "No sensor detected on this device", Toast.LENGTH_SHORT).show()
@@ -132,6 +134,15 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         }
     }
 
+    override fun onDestroy() {
+        super.onDestroy()
+        if (stepCounterSensor != null) {
+            sensorManager?.unregisterListener(this, stepCounterSensor)
+        }
+        if (stepDetectorSensor != null) {
+            sensorManager?.unregisterListener(this, stepDetectorSensor)
+        }
+    }
 
     override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {
         // We do not have to write anything in this function for this app
