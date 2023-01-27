@@ -16,6 +16,7 @@ import android.os.Bundle
 import android.view.View
 import android.widget.Toast
 import androidx.core.content.ContextCompat
+import com.example.stepcountpoc.database.AppDatabase
 import com.example.stepcountpoc.databinding.ActivityMainBinding
 
 class MainActivity : AppCompatActivity(), SensorEventListener {
@@ -25,6 +26,8 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
     private var stepDetectorSensor: Sensor? = null
     private var running = false
     var count = 0
+    private lateinit var appDb : AppDatabase
+
 
     private val PHYISCAL_ACTIVITY = 23
 
@@ -35,6 +38,9 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
+        appDb = AppDatabase.getDatabase(this)
+
 
         if (ContextCompat.checkSelfPermission(
                 this,
