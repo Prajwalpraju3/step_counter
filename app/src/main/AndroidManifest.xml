@@ -23,6 +23,12 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <service android:name="MyService"
+            android:enabled="true"
+            android:exported="false"
+            android:process="MyService"/>
+
+        <receiver android:name="MyPhoneReciver"/>
     </application>
 
 </manifest>

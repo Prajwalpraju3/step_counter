@@ -1,11 +1,12 @@
 package com.example.stepcountpoc
 
+import MyService
 import android.Manifest
+import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.hardware.Sensor
-import android.hardware.Sensor.TYPE_STEP_COUNTER
 import android.hardware.Sensor.TYPE_STEP_DETECTOR
 import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
@@ -18,15 +19,21 @@ import android.widget.Toast
 import androidx.core.content.ContextCompat
 import com.example.stepcountpoc.database.AppDatabase
 import com.example.stepcountpoc.databinding.ActivityMainBinding
+import com.ix.ibrahim7.stepcounter.other.STEP_COUNT_TODAY
+import com.ix.ibrahim7.stepcounter.util.Constant
 
 class MainActivity : AppCompatActivity(), SensorEventListener {
 
     private var sensorManager: SensorManager? = null
-    private var stepCounterSensor: Sensor? = null
     private var stepDetectorSensor: Sensor? = null
     private var running = false
     var count = 0
     private lateinit var appDb : AppDatabase
+
+
+//    private var totalStep = 0f
+//    private var previousTotalStep = 0f
+    private var todaysTotalSteps = 0
 
 
     private val PHYISCAL_ACTIVITY = 23
@@ -34,6 +41,7 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
     private lateinit var binding: ActivityMainBinding
 
 
+    @SuppressLint("ServiceCast")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
@@ -41,6 +49,8 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
 
         appDb = AppDatabase.getDatabase(this)
 
+        // Adding a context of SENSOR_SERVICE as Sensor Manager
+        sensorManager = getSystemService(Context.SENSOR_SERVICE) as SensorManager
 
         if (ContextCompat.checkSelfPermission(
                 this,
@@ -55,46 +65,36 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
                 )
             };
         } else {
+            initializeSensors()
             addListenerAndResetValues()
         }
 
 
-        // Adding a context of SENSOR_SERVICE as Sensor Manager
-        sensorManager = getSystemService(Context.SENSOR_SERVICE) as SensorManager
+
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         if (requestCode == PHYISCAL_ACTIVITY) {
+            initializeSensors()
             addListenerAndResetValues()
+
         }
         super.onActivityResult(requestCode, resultCode, data)
     }
 
     override fun onResume() {
+        stopService(Intent(this, MyService::class.java))
         super.onResume()
-        initializeSensors()
-        addListenerAndResetValues()
     }
 
     private fun initializeSensors() {
         running = true
-        stepCounterSensor = sensorManager?.getDefaultSensor(TYPE_STEP_COUNTER)
         stepDetectorSensor = sensorManager?.getDefaultSensor(TYPE_STEP_DETECTOR)
-        if (stepCounterSensor == null || stepDetectorSensor == null) {
+        if (stepDetectorSensor == null) {
             // This will give a toast message to the user if there is no sensor in the device
             Toast.makeText(this, "No sensor detected on this device", Toast.LENGTH_SHORT).show()
         } else {
             // Rate suitable for the user interface
-            sensorManager?.registerListener(
-                this,
-                stepCounterSensor,
-                SensorManager.SENSOR_DELAY_FASTEST
-            )
-            sensorManager?.registerListener(
-                this,
-                stepCounterSensor,
-                SensorManager.SENSOR_STATUS_ACCURACY_HIGH
-            )
             sensorManager?.registerListener(
                 this,
                 stepDetectorSensor,
@@ -111,14 +111,12 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
 
     override fun onSensorChanged(event: SensorEvent?) {
         if (running) {
-            if (event?.sensor?.type == TYPE_STEP_COUNTER) {
-                binding.tvTotalStepsValue.text = event.values[0].toInt().toString()
-                binding.progressBar.visibility = View.GONE
-            } else if (event?.sensor?.type == TYPE_STEP_DETECTOR) {
-                count += event.values[0].toInt()
-                binding.tvStepsTaken.text = count.toString()
-                binding.progressBar.visibility = View.VISIBLE
-
+           if (event?.sensor?.type == TYPE_STEP_DETECTOR) {
+               count += 1
+               todaysTotalSteps +=1
+               binding.tvStepsTaken.text = count.toString()
+               binding.tvTotalStepsValue.text = todaysTotalSteps.toInt().toString()
+               binding.progressBar.visibility = View.VISIBLE
             }
         }
 
@@ -138,16 +136,33 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
             count = 0
             true
         }
+        loadData()
+    }
+
+
+
+    private fun saveData() {
+        Constant.editor(this).putFloat(STEP_COUNT_TODAY, todaysTotalSteps.toFloat()).apply()
+    }
+
+    private fun loadData() {
+        todaysTotalSteps = Constant.getSharePref(this).getFloat(STEP_COUNT_TODAY, 0f).toInt()
+        binding.tvTotalStepsValue.text = todaysTotalSteps.toInt().toString()
+    }
+
+
+    override fun onStop() {
+        saveData()
+        ContextCompat.startForegroundService(this, Intent(this, MyService::class.java))
+        super.onStop()
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        if (stepCounterSensor != null) {
-            sensorManager?.unregisterListener(this, stepCounterSensor)
-        }
         if (stepDetectorSensor != null) {
             sensorManager?.unregisterListener(this, stepDetectorSensor)
         }
+
     }
 
     override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {
