@@ -1,3 +1,6 @@
+package com.example.stepcountpoc.sevices
+
+import MyPhoneReciver
 import android.app.Service
 import android.content.Intent
 import android.hardware.Sensor
@@ -19,9 +22,9 @@ class MyService : Service(),SensorEventListener {
 
     var count = 0
 
-    @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         try {
+            Log.e("com.example.stepcountpoc.sevices.MyService", "onStartCommand")
             running  =true
             count = Constant.getSharePref(this).getFloat(STEP_COUNT_TODAY, 0f).toInt()
             val stepDetectorSensor = sensorManager?.getDefaultSensor(Sensor.TYPE_STEP_DETECTOR)
@@ -49,8 +52,9 @@ class MyService : Service(),SensorEventListener {
 
     }
 
-    @RequiresApi(Build.VERSION_CODES.M)
     override fun onSensorChanged(event: SensorEvent?) {
+        Log.e("com.example.stepcountpoc.sevices.MyService", "onSensorChanged")
+
         if (running)
         count += 1
         Constant.editor(this).putFloat(STEP_COUNT_TODAY,count.toFloat()).apply()
@@ -65,7 +69,7 @@ class MyService : Service(),SensorEventListener {
     }
 
     override fun onDestroy() {
-        val intent = Intent(this,MyPhoneReciver::class.java)
+        val intent = Intent(this, MyPhoneReciver::class.java)
         sendBroadcast(intent)
         super.onDestroy()
     }

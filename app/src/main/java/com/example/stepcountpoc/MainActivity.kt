@@ -1,8 +1,9 @@
 package com.example.stepcountpoc
 
-import MyService
+import com.example.stepcountpoc.sevices.MyService
 import android.Manifest
 import android.annotation.SuppressLint
+import android.app.Service
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -16,6 +17,7 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.View
 import android.widget.Toast
+import androidx.annotation.RequiresApi
 import androidx.core.content.ContextCompat
 import com.example.stepcountpoc.database.AppDatabase
 import com.example.stepcountpoc.databinding.ActivityMainBinding
@@ -41,12 +43,14 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
     private lateinit var binding: ActivityMainBinding
 
 
+    @RequiresApi(Build.VERSION_CODES.O)
     @SuppressLint("ServiceCast")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        applicationContext.startForegroundService(Intent(applicationContext, MyService::class.java))
         appDb = AppDatabase.getDatabase(this)
 
         // Adding a context of SENSOR_SERVICE as Sensor Manager
@@ -83,7 +87,7 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
     }
 
     override fun onResume() {
-        stopService(Intent(this, MyService::class.java))
+//        stopService(Intent(this, MyService::class.java))
         super.onResume()
     }
 
@@ -153,15 +157,17 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
 
     override fun onStop() {
         saveData()
-        ContextCompat.startForegroundService(this, Intent(this, MyService::class.java))
+//        ContextCompat.startForegroundService(this, Intent(this, MyService::class.java))
         super.onStop()
     }
 
+    @RequiresApi(Build.VERSION_CODES.O)
     override fun onDestroy() {
         super.onDestroy()
         if (stepDetectorSensor != null) {
             sensorManager?.unregisterListener(this, stepDetectorSensor)
         }
+
 
     }
 
