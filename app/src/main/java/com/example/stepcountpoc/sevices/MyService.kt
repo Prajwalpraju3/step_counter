@@ -1,9 +1,6 @@
 package com.example.stepcountpoc.sevices
 
-import android.app.Notification
-import android.app.NotificationChannel
-import android.app.NotificationManager
-import android.app.Service
+import android.app.*
 import android.content.Context
 import android.content.Intent
 import android.hardware.Sensor
@@ -14,6 +11,7 @@ import android.os.Build
 import android.os.IBinder
 import android.util.Log
 import androidx.annotation.RequiresApi
+import com.example.stepcountpoc.MainActivity
 import com.ix.ibrahim7.stepcounter.other.STEP_COUNT_TODAY
 import com.ix.ibrahim7.stepcounter.util.Constant
 
@@ -24,6 +22,9 @@ class MyService : Service(),SensorEventListener {
     private var running = false
 
     var count = 0
+    lateinit var notification: Notification.Builder
+
+    lateinit var notificationManager: NotificationManager
 
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate() {
@@ -44,6 +45,15 @@ class MyService : Service(),SensorEventListener {
             SensorManager.SENSOR_STATUS_ACCURACY_HIGH
         )
 
+        val notificationIntent = Intent(applicationContext, MainActivity::class.java)
+
+        val pendingIntent = PendingIntent.getActivity(
+            this,
+            202,
+            notificationIntent,
+            PendingIntent.FLAG_UPDATE_CURRENT
+        )
+
 
         val CHANNELID = "Foreground Service ID"
         val channel = NotificationChannel(
@@ -53,14 +63,14 @@ class MyService : Service(),SensorEventListener {
         )
 
         getSystemService(NotificationManager::class.java).createNotificationChannel(channel)
-        val notification: Notification.Builder = Notification.Builder(this, CHANNELID)
-            .setContentText("Service is running")
-            .setContentTitle("Service enabled")
-            .setSmallIcon(com.example.stepcountpoc.R.drawable.ic_launcher_background)
+        notification = Notification.Builder(this, CHANNELID)
+            .setContentText("Try to complete your target!!")
+            .setContentIntent(pendingIntent)
+            .setContentTitle("Steps $count / 10000")
+            .setSmallIcon(com.example.stepcountpoc.R.drawable.ic_run)
 
 
-//            startService(intent)
-
+        notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         startForeground(1001, notification.build())
 
         super.onCreate()
@@ -68,32 +78,8 @@ class MyService : Service(),SensorEventListener {
 
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-
-
-
         try {
             Log.e("com.example.stepcountpoc.sevices.MyService", "onStartCommand")
-
-
-//
-//            val CHANNELID = "Foreground Service ID"
-//            val channel = NotificationChannel(
-//                CHANNELID,
-//                CHANNELID,
-//                NotificationManager.IMPORTANCE_LOW
-//            )
-//
-//            getSystemService(NotificationManager::class.java).createNotificationChannel(channel)
-//            val notification: Notification.Builder = Notification.Builder(this, CHANNELID)
-//                .setContentText("Service is running")
-//                .setContentTitle("Service enabled")
-//                .setSmallIcon(com.example.stepcountpoc.R.drawable.ic_launcher_background)
-//
-//
-////            startService(intent)
-//
-//            startForeground(1001, notification.build())
-//            startService(this)
         } catch (e: Exception) {
             Log.e("eee ERROR", e.message.toString())
         }
@@ -110,6 +96,8 @@ class MyService : Service(),SensorEventListener {
     override fun onSensorChanged(event: SensorEvent?) {
         Log.e("MyService", "onSensorChanged")
         count += 1
+        notification.setContentTitle("Steps $count / 10000");
+        notificationManager.notify(1001, notification.build());
         Constant.editor(this).putFloat(STEP_COUNT_TODAY,count.toFloat()).apply()
     }
 
