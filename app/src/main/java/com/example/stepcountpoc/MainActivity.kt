@@ -1,8 +1,11 @@
 package com.example.stepcountpoc
 
+import MyPhoneReciver
 import com.example.stepcountpoc.sevices.MyService
 import android.Manifest
 import android.annotation.SuppressLint
+import android.app.Notification
+import android.app.PendingIntent
 import android.app.Service
 import android.content.Context
 import android.content.Intent
@@ -50,7 +53,6 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        applicationContext.startForegroundService(Intent(applicationContext, MyService::class.java))
         appDb = AppDatabase.getDatabase(this)
 
         // Adding a context of SENSOR_SERVICE as Sensor Manager
@@ -87,7 +89,7 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
     }
 
     override fun onResume() {
-//        stopService(Intent(this, MyService::class.java))
+        stopService(Intent(applicationContext, MyService::class.java))
         super.onResume()
     }
 
@@ -155,9 +157,10 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
     }
 
 
+    @RequiresApi(Build.VERSION_CODES.O)
     override fun onStop() {
         saveData()
-//        ContextCompat.startForegroundService(this, Intent(this, MyService::class.java))
+//        applicationContext.startForegroundService( Intent(applicationContext, MyService::class.java))
         super.onStop()
     }
 
@@ -167,6 +170,11 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         if (stepDetectorSensor != null) {
             sensorManager?.unregisterListener(this, stepDetectorSensor)
         }
+
+        ContextCompat.startForegroundService(this, Intent(this, MyService::class.java))
+
+//        val intent = Intent(this, MyPhoneReciver::class.java)
+//        sendBroadcast(intent)
 
 
     }
