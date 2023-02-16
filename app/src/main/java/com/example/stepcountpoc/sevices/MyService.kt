@@ -1,7 +1,5 @@
 package com.example.stepcountpoc.sevices
 
-import MyPhoneReciver
-import android.R
 import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
@@ -124,7 +122,7 @@ class MyService : Service(),SensorEventListener {
     }
 
     override fun onDestroy() {
-//        val intent = Intent(this, MyPhoneReciver::class.java)
+//        val intent = Intent(this, com.example.stepcountpoc.sevices.MyPhoneReciver::class.java)
 //        sendBroadcast(intent)
         super.onDestroy()
     }
