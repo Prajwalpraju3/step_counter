@@ -29,8 +29,8 @@
         </activity>
         <service android:name=".sevices.MyService"
             android:enabled="true"
-            android:exported="false"
-            android:foregroundServiceType="dataSync"
+            android:exported="true"
+            android:foregroundServiceType="location"
            />
 
         <receiver android:name=".sevices.MyPhoneReciver"/>

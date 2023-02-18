@@ -32,18 +32,20 @@ class MyService : Service(),SensorEventListener {
         count = Constant.getSharePref(this).getFloat(STEP_COUNT_TODAY, 0f).toInt()
 
         sensorManager =  getSystemService(Context.SENSOR_SERVICE) as SensorManager
-        val stepDetectorSensor = sensorManager?.getDefaultSensor(Sensor.TYPE_STEP_DETECTOR)
+        val stepDetectorSensor = sensorManager?.getDefaultSensor(Sensor.TYPE_STEP_DETECTOR,true)
 
-        sensorManager?.registerListener(
-            this,
-            stepDetectorSensor,
-            SensorManager.SENSOR_DELAY_FASTEST
-        )
+//        sensorManager?.registerListener(
+//            this,
+//            stepDetectorSensor,
+//            SensorManager.SENSOR_DELAY_FASTEST
+//        )
+
         sensorManager?.registerListener(
             this,
             stepDetectorSensor,
             SensorManager.SENSOR_STATUS_ACCURACY_HIGH
         )
+
 
         val notificationIntent = Intent(applicationContext, MainActivity::class.java)
 
@@ -79,7 +81,7 @@ class MyService : Service(),SensorEventListener {
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         try {
-            Log.e("com.example.stepcountpoc.sevices.MyService", "onStartCommand")
+            Log.e("MyService", "onStartCommand")
         } catch (e: Exception) {
             Log.e("eee ERROR", e.message.toString())
         }
@@ -102,16 +104,21 @@ class MyService : Service(),SensorEventListener {
     }
 
     override fun onBind(intent: Intent?): IBinder? {
+        Log.e("MyService", "onBind")
+
         return null
     }
 
     override fun stopService(name: Intent?): Boolean {
+        Log.e("MyService", "stopService")
+
         return super.stopService(name)
     }
 
     override fun onDestroy() {
-//        val intent = Intent(this, com.example.stepcountpoc.sevices.MyPhoneReciver::class.java)
-//        sendBroadcast(intent)
+        Log.e("MyService", "onDestroy")
+        val intent = Intent(this,MyPhoneReciver::class.java)
+        sendBroadcast(intent)
         super.onDestroy()
     }
 

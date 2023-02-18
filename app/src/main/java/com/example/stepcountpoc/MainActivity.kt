@@ -75,6 +75,7 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
 
     }
 
+    @RequiresApi(Build.VERSION_CODES.O)
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         if (requestCode == PHYISCAL_ACTIVITY) {
             initializeSensors()
@@ -156,7 +157,6 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onStop() {
         saveData()
-//        applicationContext.startForegroundService( Intent(applicationContext, MyService::class.java))
         super.onStop()
     }
 
@@ -168,10 +168,6 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         }
 
         ContextCompat.startForegroundService(this, Intent(this, MyService::class.java))
-
-//        val intent = Intent(this, com.example.stepcountpoc.sevices.MyPhoneReciver::class.java)
-//        sendBroadcast(intent)
-
 
     }
 
