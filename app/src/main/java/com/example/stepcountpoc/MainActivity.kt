@@ -1,8 +1,9 @@
 package com.example.stepcountpoc
 
-import com.example.stepcountpoc.sevices.MyService
 import android.Manifest
 import android.annotation.SuppressLint
+import android.app.ActivityManager
+import android.app.Dialog
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -12,16 +13,24 @@ import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
 import android.hardware.SensorManager
 import android.os.Build
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.view.Menu
+import android.view.MenuInflater
+import android.view.MenuItem
 import android.view.View
+import android.widget.Button
+import android.widget.EditText
 import android.widget.Toast
 import androidx.annotation.RequiresApi
+import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import com.example.stepcountpoc.database.AppDatabase
 import com.example.stepcountpoc.databinding.ActivityMainBinding
+import com.example.stepcountpoc.sevices.MyService
+import com.ix.ibrahim7.stepcounter.other.STEP_COUNT_TARGET
 import com.ix.ibrahim7.stepcounter.other.STEP_COUNT_TODAY
 import com.ix.ibrahim7.stepcounter.util.Constant
+
 
 class MainActivity : AppCompatActivity(), SensorEventListener {
 
@@ -29,10 +38,10 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
     private var stepDetectorSensor: Sensor? = null
     private var running = false
     var count = 0
-    private lateinit var appDb : AppDatabase
+    private lateinit var appDb: AppDatabase
 
 
-//    private var totalStep = 0f
+    //    private var totalStep = 0f
 //    private var previousTotalStep = 0f
     private var todaysTotalSteps = 0
 
@@ -72,6 +81,55 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         }
 
 
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu): Boolean {
+        val inflater: MenuInflater = menuInflater
+        inflater.inflate(R.menu.steps_menu, menu)
+        return true
+    }
+
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        // Handle item selection
+        return when (item.itemId) {
+            R.id.clear_steps -> {
+                setCountToZero()
+                Toast.makeText(this, "Success..!", Toast.LENGTH_SHORT).show()
+                true
+            }
+            R.id.change_target -> {
+                openDialog()
+
+
+                true
+            }
+            else -> super.onOptionsItemSelected(item)
+        }
+    }
+
+    private fun openDialog() {
+        var dialog = Dialog(this, android.R.style.Theme_Material_Light_Dialog_Alert)
+        dialog.setContentView(R.layout.simple_input)
+        val btOk = dialog.findViewById(R.id.bt_ok) as Button
+        val etSteps = dialog.findViewById(R.id.et_steps) as EditText
+
+        btOk.setOnClickListener {
+            if (etSteps.text.isNotEmpty()) {
+                Constant.editor(this).putFloat(STEP_COUNT_TARGET, etSteps.text.toString().toFloat())
+                    .apply()
+                dialog.dismiss()
+                Toast.makeText(
+                    this,
+                    "New Target ${etSteps.text} Updated!!",
+                    Toast.LENGTH_SHORT
+                ).show()
+            } else {
+                dialog.dismiss()
+            }
+        }
+        dialog.show()
+
 
     }
 
@@ -88,8 +146,10 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
     }
 
     override fun onResume() {
-        stopService(Intent(applicationContext, MyService::class.java))
         super.onResume()
+        if (isMyServiceRunning(MyService::class.java)) {
+            stopService(Intent(applicationContext, MyService::class.java))
+        }
     }
 
     private fun initializeSensors() {
@@ -116,12 +176,12 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
 
     override fun onSensorChanged(event: SensorEvent?) {
         if (running) {
-           if (event?.sensor?.type == TYPE_STEP_DETECTOR) {
-               count += 1
-               todaysTotalSteps +=1
-               binding.tvStepsTaken.text = count.toString()
-               binding.tvTotalStepsValue.text = todaysTotalSteps.toInt().toString()
-               binding.progressBar.visibility = View.VISIBLE
+            if (event?.sensor?.type == TYPE_STEP_DETECTOR) {
+                count += 1
+                todaysTotalSteps += 1
+                binding.tvStepsTaken.text = count.toString()
+                binding.tvTotalStepsValue.text = todaysTotalSteps.toInt().toString()
+                binding.progressBar.visibility = View.GONE
             }
         }
 
@@ -145,9 +205,19 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
     }
 
 
-
     private fun saveData() {
         Constant.editor(this).putFloat(STEP_COUNT_TODAY, todaysTotalSteps.toFloat()).apply()
+    }
+
+
+    private fun setCountToZero() {
+        todaysTotalSteps = 0
+        count = 0
+        Constant.editor(this).putFloat(STEP_COUNT_TODAY, todaysTotalSteps.toFloat()).apply()
+        binding.tvTotalStepsValue.text = todaysTotalSteps.toString()
+        binding.tvStepsTaken.text = count.toString()
+        startMyService()
+
     }
 
     private fun loadData() {
@@ -159,7 +229,18 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onStop() {
         saveData()
+        startMyService()
         super.onStop()
+    }
+
+    private fun startMyService() {
+        if (isMyServiceRunning(MyService::class.java)) stopService(
+            Intent(
+                applicationContext,
+                MyService::class.java
+            )
+        )
+        ContextCompat.startForegroundService(this, Intent(this, MyService::class.java))
     }
 
     @RequiresApi(Build.VERSION_CODES.O)
@@ -169,11 +250,22 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
             sensorManager?.unregisterListener(this, stepDetectorSensor)
         }
 
-        ContextCompat.startForegroundService(this, Intent(this, MyService::class.java))
-
     }
 
     override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {
         // We do not have to write anything in this function for this app
     }
+
+
+    private fun isMyServiceRunning(serviceClass: Class<*>): Boolean {
+        val manager = getSystemService(ACTIVITY_SERVICE) as ActivityManager
+        for (service in manager.getRunningServices(Int.MAX_VALUE)) {
+            if (serviceClass.name == service.service.className) {
+                return true
+            }
+        }
+        return false
+    }
+
+
 }

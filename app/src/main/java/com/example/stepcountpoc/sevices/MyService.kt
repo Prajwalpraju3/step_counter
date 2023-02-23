@@ -12,6 +12,7 @@ import android.os.IBinder
 import android.util.Log
 import androidx.annotation.RequiresApi
 import com.example.stepcountpoc.MainActivity
+import com.ix.ibrahim7.stepcounter.other.STEP_COUNT_TARGET
 import com.ix.ibrahim7.stepcounter.other.STEP_COUNT_TODAY
 import com.ix.ibrahim7.stepcounter.util.Constant
 
@@ -22,23 +23,24 @@ class MyService : Service(),SensorEventListener {
     private var running = false
 
     var count = 0
+    var target = 10000
     lateinit var notification: Notification.Builder
 
     lateinit var notificationManager: NotificationManager
+    private var stepDetectorSensor:Sensor? = null
 
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate() {
         running  =true
         count = Constant.getSharePref(this).getFloat(STEP_COUNT_TODAY, 0f).toInt()
+        target = Constant.getSharePref(this).getFloat(STEP_COUNT_TARGET, 0f).toInt()
 
         sensorManager =  getSystemService(Context.SENSOR_SERVICE) as SensorManager
-        val stepDetectorSensor = sensorManager?.getDefaultSensor(Sensor.TYPE_STEP_DETECTOR,true)
+        stepDetectorSensor = sensorManager?.getDefaultSensor(Sensor.TYPE_STEP_DETECTOR,true)
 
-//        sensorManager?.registerListener(
-//            this,
-//            stepDetectorSensor,
-//            SensorManager.SENSOR_DELAY_FASTEST
-//        )
+      if(stepDetectorSensor==null) {
+          return
+      }
 
         sensorManager?.registerListener(
             this,
@@ -61,14 +63,14 @@ class MyService : Service(),SensorEventListener {
         val channel = NotificationChannel(
             CHANNELID,
             CHANNELID,
-            NotificationManager.IMPORTANCE_LOW
+            NotificationManager.IMPORTANCE_HIGH
         )
 
         getSystemService(NotificationManager::class.java).createNotificationChannel(channel)
         notification = Notification.Builder(this, CHANNELID)
             .setContentText("Try to complete your target!!")
             .setContentIntent(pendingIntent)
-            .setContentTitle("Steps $count / 10000")
+            .setContentTitle("Steps $count / $target")
             .setSmallIcon(com.example.stepcountpoc.R.drawable.ic_run)
 
 
@@ -117,6 +119,9 @@ class MyService : Service(),SensorEventListener {
 
     override fun onDestroy() {
         Log.e("MyService", "onDestroy")
+        if (stepDetectorSensor != null) {
+            sensorManager?.unregisterListener(this, stepDetectorSensor)
+        }
         val intent = Intent(this,MyPhoneReciver::class.java)
         sendBroadcast(intent)
         super.onDestroy()

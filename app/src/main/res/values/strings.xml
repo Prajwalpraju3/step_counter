@@ -2,4 +2,7 @@
     <string name="app_name">Step count POC</string>
     <string name="long_tap_on_the_count_to_reset_steps">Long tap on the count to reset steps</string>
     <string name="total_steps">"Today's total steps : "</string>
+    <string name="change_target_count">Update Daily Goal</string>
+    <string name="clear_steps">Clear All Steps</string>
+    <string name="modify_data">Update Daily Goal</string>
 </resources>
