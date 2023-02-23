@@ -75,14 +75,16 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
 
     }
 
-    @RequiresApi(Build.VERSION_CODES.O)
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
+    ) {
         if (requestCode == PHYISCAL_ACTIVITY) {
             initializeSensors()
             addListenerAndResetValues()
-
         }
-        super.onActivityResult(requestCode, resultCode, data)
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
     }
 
     override fun onResume() {
