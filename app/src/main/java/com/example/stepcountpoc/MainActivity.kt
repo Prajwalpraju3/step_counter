@@ -51,8 +51,6 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
     private lateinit var binding: ActivityMainBinding
 
 
-    @RequiresApi(Build.VERSION_CODES.O)
-    @SuppressLint("ServiceCast")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
@@ -74,7 +72,10 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
                     arrayOf(Manifest.permission.ACTIVITY_RECOGNITION),
                     PHYISCAL_ACTIVITY
                 )
-            };
+            } else {
+                initializeSensors()
+                addListenerAndResetValues()
+            }
         } else {
             initializeSensors()
             addListenerAndResetValues()
@@ -112,7 +113,9 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         var dialog = Dialog(this, android.R.style.Theme_Material_Light_Dialog_Alert)
         dialog.setContentView(R.layout.simple_input)
         val btOk = dialog.findViewById(R.id.bt_ok) as Button
-        val etSteps = dialog.findViewById(R.id.et_steps) as EditText
+        var etSteps = dialog.findViewById(R.id.et_steps) as EditText
+        val goalCount =  Constant.getSharePref(this).getFloat(STEP_COUNT_TARGET, 5000f).toInt()
+        etSteps.setText("$goalCount")
 
         btOk.setOnClickListener {
             if (etSteps.text.isNotEmpty()) {
@@ -240,7 +243,11 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
                 MyService::class.java
             )
         )
-        ContextCompat.startForegroundService(this, Intent(this, MyService::class.java))
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            ContextCompat.startForegroundService(this, Intent(this, MyService::class.java))
+        } else {
+            this.startService(Intent(this, MyService::class.java));
+        }
     }
 
     @RequiresApi(Build.VERSION_CODES.O)

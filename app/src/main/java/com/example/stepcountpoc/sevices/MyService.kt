@@ -23,7 +23,7 @@ class MyService : Service(),SensorEventListener {
     private var running = false
 
     var count = 0
-    var target = 10000
+    var target = 0
     lateinit var notification: Notification.Builder
 
     lateinit var notificationManager: NotificationManager
@@ -33,7 +33,7 @@ class MyService : Service(),SensorEventListener {
     override fun onCreate() {
         running  =true
         count = Constant.getSharePref(this).getFloat(STEP_COUNT_TODAY, 0f).toInt()
-        target = Constant.getSharePref(this).getFloat(STEP_COUNT_TARGET, 0f).toInt()
+        target = Constant.getSharePref(this).getFloat(STEP_COUNT_TARGET, 5000f).toInt()
 
         sensorManager =  getSystemService(Context.SENSOR_SERVICE) as SensorManager
         stepDetectorSensor = sensorManager?.getDefaultSensor(Sensor.TYPE_STEP_DETECTOR,true)
@@ -87,8 +87,6 @@ class MyService : Service(),SensorEventListener {
         } catch (e: Exception) {
             Log.e("eee ERROR", e.message.toString())
         }
-
-
         return START_STICKY
     }
 
@@ -100,7 +98,7 @@ class MyService : Service(),SensorEventListener {
     override fun onSensorChanged(event: SensorEvent?) {
         Log.e("MyService", "onSensorChanged")
         count += 1
-        notification.setContentTitle("Steps $count / 10000");
+        notification.setContentTitle("Steps $count / $target");
         notificationManager.notify(1001, notification.build());
         Constant.editor(this).putFloat(STEP_COUNT_TODAY,count.toFloat()).apply()
     }
