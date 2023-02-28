@@ -36,17 +36,11 @@ class MyService : Service(),SensorEventListener {
         target = Constant.getSharePref(this).getFloat(STEP_COUNT_TARGET, 5000f).toInt()
 
         sensorManager =  getSystemService(Context.SENSOR_SERVICE) as SensorManager
-        stepDetectorSensor = sensorManager?.getDefaultSensor(Sensor.TYPE_STEP_DETECTOR,true)
+        stepDetectorSensor = sensorManager?.getDefaultSensor(Sensor.TYPE_STEP_DETECTOR,false)
 
-      if(stepDetectorSensor==null) {
-          return
-      }
-
-        sensorManager?.registerListener(
-            this,
-            stepDetectorSensor,
-            SensorManager.SENSOR_STATUS_ACCURACY_HIGH
-        )
+//      if(stepDetectorSensor==null) {
+//          return
+//      }
 
 
         val notificationIntent = Intent(applicationContext, MainActivity::class.java)
@@ -55,7 +49,7 @@ class MyService : Service(),SensorEventListener {
             this,
             202,
             notificationIntent,
-            PendingIntent.FLAG_UPDATE_CURRENT
+            PendingIntent.FLAG_MUTABLE
         )
 
 
@@ -76,6 +70,13 @@ class MyService : Service(),SensorEventListener {
 
         notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         startForeground(1001, notification.build())
+
+        sensorManager?.registerListener(
+            this,
+            stepDetectorSensor,
+            SensorManager.SENSOR_STATUS_ACCURACY_HIGH
+        )
+
 
         super.onCreate()
     }

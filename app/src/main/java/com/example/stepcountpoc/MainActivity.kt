@@ -1,7 +1,6 @@
 package com.example.stepcountpoc
 
 import android.Manifest
-import android.annotation.SuppressLint
 import android.app.ActivityManager
 import android.app.Dialog
 import android.content.Context
