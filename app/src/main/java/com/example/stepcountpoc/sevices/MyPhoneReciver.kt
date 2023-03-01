@@ -8,8 +8,8 @@ import androidx.core.content.ContextCompat
 class MyPhoneReciver : BroadcastReceiver(){
     override fun onReceive(context: Context?, intent: Intent?) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            ContextCompat.startForegroundService(context!!, Intent(context, MyService::class.java))
+            ContextCompat.startForegroundService(context!!, Intent(context, StepDetectorService::class.java))
         } else {
-            context?.startService( Intent(context, MyService::class.java) );
+            context?.startService( Intent(context, StepDetectorService::class.java) );
         }    }
 }

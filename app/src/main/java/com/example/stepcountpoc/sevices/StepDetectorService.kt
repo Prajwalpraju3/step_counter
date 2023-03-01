@@ -17,7 +17,7 @@ import com.ix.ibrahim7.stepcounter.other.STEP_COUNT_TODAY
 import com.ix.ibrahim7.stepcounter.util.Constant
 
 
-class MyService : Service(),SensorEventListener {
+class StepDetectorService : Service(), SensorEventListener {
 
     private var sensorManager: SensorManager? = null
     private var running = false
@@ -27,20 +27,26 @@ class MyService : Service(),SensorEventListener {
     lateinit var notification: Notification.Builder
 
     lateinit var notificationManager: NotificationManager
-    private var stepDetectorSensor:Sensor? = null
+    private var stepDetectorSensor: Sensor? = null
 
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate() {
-        running  =true
+        running = true
         count = Constant.getSharePref(this).getFloat(STEP_COUNT_TODAY, 0f).toInt()
         target = Constant.getSharePref(this).getFloat(STEP_COUNT_TARGET, 5000f).toInt()
 
-        sensorManager =  getSystemService(Context.SENSOR_SERVICE) as SensorManager
-        stepDetectorSensor = sensorManager?.getDefaultSensor(Sensor.TYPE_STEP_DETECTOR,false)
+        sensorManager = getSystemService(Context.SENSOR_SERVICE) as SensorManager
+        stepDetectorSensor = sensorManager?.getDefaultSensor(Sensor.TYPE_STEP_DETECTOR, false)
 
-//      if(stepDetectorSensor==null) {
-//          return
-//      }
+        if (stepDetectorSensor == null) {
+            return
+        }
+
+        sensorManager?.registerListener(
+            this,
+            stepDetectorSensor,
+            SensorManager.SENSOR_STATUS_ACCURACY_HIGH
+        )
 
 
         val notificationIntent = Intent(applicationContext, MainActivity::class.java)
@@ -71,11 +77,6 @@ class MyService : Service(),SensorEventListener {
         notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         startForeground(1001, notification.build())
 
-        sensorManager?.registerListener(
-            this,
-            stepDetectorSensor,
-            SensorManager.SENSOR_STATUS_ACCURACY_HIGH
-        )
 
 
         super.onCreate()
@@ -101,7 +102,7 @@ class MyService : Service(),SensorEventListener {
         count += 1
         notification.setContentTitle("Steps $count / $target");
         notificationManager.notify(1001, notification.build());
-        Constant.editor(this).putFloat(STEP_COUNT_TODAY,count.toFloat()).apply()
+        Constant.editor(this).putFloat(STEP_COUNT_TODAY, count.toFloat()).apply()
     }
 
     override fun onBind(intent: Intent?): IBinder? {
@@ -121,7 +122,7 @@ class MyService : Service(),SensorEventListener {
         if (stepDetectorSensor != null) {
             sensorManager?.unregisterListener(this, stepDetectorSensor)
         }
-        val intent = Intent(this,MyPhoneReciver::class.java)
+        val intent = Intent(this, MyPhoneReciver::class.java)
         sendBroadcast(intent)
         super.onDestroy()
     }

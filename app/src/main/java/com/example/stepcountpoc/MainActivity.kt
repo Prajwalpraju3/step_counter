@@ -25,7 +25,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import com.example.stepcountpoc.database.AppDatabase
 import com.example.stepcountpoc.databinding.ActivityMainBinding
-import com.example.stepcountpoc.sevices.MyService
+import com.example.stepcountpoc.sevices.StepDetectorService
 import com.ix.ibrahim7.stepcounter.other.STEP_COUNT_TARGET
 import com.ix.ibrahim7.stepcounter.other.STEP_COUNT_TODAY
 import com.ix.ibrahim7.stepcounter.util.Constant
@@ -40,11 +40,8 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
     private lateinit var appDb: AppDatabase
 
 
-    //    private var totalStep = 0f
-//    private var previousTotalStep = 0f
+
     private var todaysTotalSteps = 0
-
-
     private val PHYISCAL_ACTIVITY = 23
 
     private lateinit var binding: ActivityMainBinding
@@ -109,10 +106,10 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
     }
 
     private fun openDialog() {
-        var dialog = Dialog(this, android.R.style.Theme_Material_Light_Dialog_Alert)
+        val dialog = Dialog(this, android.R.style.Theme_Material_Light_Dialog_Alert)
         dialog.setContentView(R.layout.simple_input)
         val btOk = dialog.findViewById(R.id.bt_ok) as Button
-        var etSteps = dialog.findViewById(R.id.et_steps) as EditText
+        val etSteps = dialog.findViewById(R.id.et_steps) as EditText
         val goalCount =  Constant.getSharePref(this).getFloat(STEP_COUNT_TARGET, 5000f).toInt()
         etSteps.setText("$goalCount")
 
@@ -149,8 +146,8 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
 
     override fun onResume() {
         super.onResume()
-        if (isMyServiceRunning(MyService::class.java)) {
-            stopService(Intent(applicationContext, MyService::class.java))
+        if (isMyServiceRunning(StepDetectorService::class.java)) {
+            stopService(Intent(applicationContext, StepDetectorService::class.java))
         }
     }
 
@@ -218,7 +215,7 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         Constant.editor(this).putFloat(STEP_COUNT_TODAY, todaysTotalSteps.toFloat()).apply()
         binding.tvTotalStepsValue.text = todaysTotalSteps.toString()
         binding.tvStepsTaken.text = count.toString()
-        startMyService()
+        startService()
 
     }
 
@@ -231,21 +228,21 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onStop() {
         saveData()
-        startMyService()
+        startService()
         super.onStop()
     }
 
-    private fun startMyService() {
-        if (isMyServiceRunning(MyService::class.java)) stopService(
+    private fun startService() {
+        if (isMyServiceRunning(StepDetectorService::class.java)) stopService(
             Intent(
                 applicationContext,
-                MyService::class.java
+                StepDetectorService::class.java
             )
         )
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            ContextCompat.startForegroundService(this, Intent(this, MyService::class.java))
+            ContextCompat.startForegroundService(this, Intent(this, StepDetectorService::class.java))
         } else {
-            this.startService(Intent(this, MyService::class.java));
+            this.startService(Intent(this, StepDetectorService::class.java));
         }
     }
 

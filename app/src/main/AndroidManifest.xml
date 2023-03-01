@@ -28,7 +28,7 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <service android:name=".sevices.MyService"
+        <service android:name=".sevices.StepDetectorService"
             android:enabled="true"
             android:exported="true"
             android:foregroundServiceType="dataSync"
